@@ -1,0 +1,33 @@
+version: "3.3"
+   
+services:
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - migration
+      - db
+
+  migration:
+    image: postgres
+    command: 
+      - python manage.py migrate --noinput
+      - python manage.py makemigrations employee_register
+      - python manage.py sqlmigrate  employee_register 0001
+      - python manage.py migrate
+    volumes:
+      - .:/code
+    depends_on:
+      - db

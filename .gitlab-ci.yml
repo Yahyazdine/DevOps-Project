@@ -1,0 +1,24 @@
+image: docker:latest
+services:
+    - docker:dind
+stages:
+    - build
+    - test
+    - deploy
+before_script:
+    - sudo docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+build:
+    stage: build
+    script:
+        - sudo docker build --pull -t "$CI_REGISTRY_IMAGE" .
+        - sudo docker push "$CI_REGISTRY_IMAGE"
+test:
+    stage: test
+    script:
+        - sudo apt -y install docker-compose
+        - sudo docker-compose run web python manage.py test 
+deploy:
+    stage: deploy
+    script:
+        - sudo apt -y install docker-compose
+        - sudo docker-compose up 
